@@ -10,6 +10,51 @@ class RandomWords extends StatefulWidget {
 
 class RandomWordsState extends State<RandomWords> {
   final _randomWordPairs = <WordPair>[];
+  final favouriteWordPairs = Set<WordPair>();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("WordPair Generator"),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.list),
+            onPressed: _pushFavourites,)
+        ],
+      ),
+      body: _buildList(),
+    );
+  }
+
+  void _pushFavourites(){
+    Navigator.of(context).push(
+      MaterialPageRoute(
+          builder: (BuildContext context){
+            final Iterable<ListTile> tiles = favouriteWordPairs.map((WordPair pair) {
+              return ListTile(
+                title: Text(pair.asPascalCase),
+              );
+            });
+
+            final List<Widget> divided = ListTile.divideTiles(
+                context: context,
+                tiles: tiles
+            ).toList();
+
+            return Scaffold(
+              appBar: AppBar(
+                title: Text("Saved WordPairs")
+              ),
+              body: ListView(
+                children: divided,
+              ),
+            );
+          }
+          )
+    );
+  }
+
 
   Widget _buildList() {
     return ListView.builder(
@@ -29,18 +74,22 @@ class RandomWordsState extends State<RandomWords> {
   }
 
   Widget _buildRow(WordPair pair) {
+    final alreadyFavourite = favouriteWordPairs.contains(pair);
     return ListTile(
       title: Text(pair.asPascalCase),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("WordPair Generator"),
+      trailing: Icon(
+        alreadyFavourite ? Icons.favorite : Icons.favorite_outline,
+        color: alreadyFavourite ? Colors.red : null,
       ),
-      body: _buildList(),
+      onTap: () {
+        setState(() {
+          if (alreadyFavourite) {
+            favouriteWordPairs.remove(pair);
+          } else {
+            favouriteWordPairs.add(pair);
+          }
+        });
+      },
     );
   }
 }
